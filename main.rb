@@ -8,19 +8,23 @@ HOROSH_STICKER = 'CAADAgADQAADR6pIA-gUF1CgDVpoAg'
 EBANINA_STICKER_PACK = 'EbaninaFromPolina'
 TOKEN = ENV.fetch('token')
 PROXY = ENV.fetch('proxy')
-CHGK_QUESTION_URL = 'https://db.chgk.info/xml/random/from_2012-01-01/limit1'
+CHGK_QUESTION_URL = 'https://db.chgk.info/xml/random/from_2012-01-01/limit1/types1'
+CHGK_IMAGE_URL = 'https://db.chgk.info/images/db/'
+CHGK_COPYRIGHT_URL = 'http://db.chgk.info'
+MARRY_TEXTS = ['Профорк, долго еще Ане в девках ходить?', 'Будь мужиком@сделай предложение', 'Свадьба скоро?', 'Я уже приготовил фломастеры']
+PIC_TEXT = 'pic: '
 
 def nina_sticker(bot)
   @time = Time.now + Random.rand(4600..7600)
   begin
     loop do
-    sleep 1200
-    p @time
-    if Time.now.hour < 24 && Time.now.hour > 8 && Time.now > @time
-      bot.api.send_sticker(chat_id: -1001098597975, sticker: NINA_STICKER)
-      @time = Time.now + Random.rand(4600..7600)
+      sleep 1200
+      p @time
+      if Time.now.hour < 21 && Time.now.hour > 8 && Time.now > @time
+        bot.api.send_sticker(chat_id: -1001098597975, sticker: NINA_STICKER)
+        @time = Time.now + Random.rand(4600..7600)
+      end
     end
-  end
   rescue => e
     p e.message
     retry
@@ -40,7 +44,7 @@ def work(bot)
       when '/horosh@the_polina_bot'
         bot.api.send_sticker(chat_id: message.chat.id, sticker: HOROSH_STICKER)
       when '/marry@the_polina_bot'
-        bot.api.send_message(chat_id: message.chat.id, text: "Профорк, долго еще Ане в девках ходить?")
+        bot.api.send_message(chat_id: message.chat.id, text: MARRY_TEXTS.sample)
       when '/reaction@the_polina_bot'
         stickers = bot.api.get_sticker_set(name: EBANINA_STICKER_PACK)['result']['stickers']
         bot.api.send_sticker(chat_id: message.chat.id, sticker: stickers.sample['file_id'])
@@ -50,9 +54,14 @@ def work(bot)
         question = Nokogiri::XML(request).at_xpath('//Question').content
         answer = Nokogiri::XML(request).at_xpath('//Answer').content
         comments = Nokogiri::XML(request).at_xpath('//Comments').content
-        bot.api.send_message(chat_id: message.chat.id, text: question)
+        date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
+        criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
+        if question.include?(PIC_TEXT)
+          question.gsub!(PIC_TEXT, CHGK_IMAGE_URL)
+        end
+        bot.api.send_message(chat_id: message.chat.id, text: "#{question} #{date}")
         sleep 60
-        bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{comments}) (с) http://db.chgk.info")
+        bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) (с) #{CHGK_COPYRIGHT_URL}")
       end
     end
   rescue => e
