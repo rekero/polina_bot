@@ -20,7 +20,7 @@ def nina_sticker(bot)
     loop do
       sleep 1200
       p @time
-      if Time.now.hour < 21 && Time.now.hour > 8 && Time.now > @time
+      if Time.now.hour < 18 && Time.now.hour > 5 && Time.now > @time
         bot.api.send_sticker(chat_id: -1001098597975, sticker: NINA_STICKER)
         @time = Time.now + Random.rand(4600..7600)
       end
@@ -55,13 +55,18 @@ def work(bot)
         answer = Nokogiri::XML(request).at_xpath('//Answer').content
         comments = Nokogiri::XML(request).at_xpath('//Comments').content
         date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
+        authors = Nokogiri::XML(request).at_xpath('//Authors').content
         criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
         if question.include?(PIC_TEXT)
           question.gsub!(PIC_TEXT, CHGK_IMAGE_URL)
         end
-        bot.api.send_message(chat_id: message.chat.id, text: "#{question} #{date}")
-        sleep 60
-        bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) (с) #{CHGK_COPYRIGHT_URL}")
+        if authors.include?('Ершов')
+          bot.api.send_message(chat_id: message.chat.id, text: "Я спас вас от вопроса Ершова")
+        else
+          bot.api.send_message(chat_id: message.chat.id, text: "#{question} #{date}")
+          sleep 60
+          bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) (с) #{CHGK_COPYRIGHT_URL}")
+        end
       end
     end
   rescue => e
