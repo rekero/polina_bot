@@ -4,6 +4,7 @@ require 'telegram/bot'
 require 'nokogiri'
 require_relative 'faraday'
 NINA_STICKER = 'CAADAgADWwADR6pIA_YeZRDKDLd7Ag'
+FOR_NINA_STICKER = 'CAADAgAD-gADR6pIA6S-20U5eYtHAg'
 HOROSH_STICKER = 'CAADAgADQAADR6pIA-gUF1CgDVpoAg'
 EBANINA_STICKER_PACK = 'EbaninaFromPolina'
 TOKEN = ENV.fetch('token')
@@ -46,8 +47,12 @@ def work(bot)
       when '/marry@the_polina_bot'
         bot.api.send_message(chat_id: message.chat.id, text: MARRY_TEXTS.sample)
       when '/reaction@the_polina_bot'
-        stickers = bot.api.get_sticker_set(name: EBANINA_STICKER_PACK)['result']['stickers']
-        bot.api.send_sticker(chat_id: message.chat.id, sticker: stickers.sample['file_id'])
+        if message.from.username == 'DaedraAzura'
+          bot.api.send_sticker(chat_id: message.chat.id, sticker: FOR_NINA_STICKER)
+        else
+          stickers = bot.api.get_sticker_set(name: EBANINA_STICKER_PACK)['result']['stickers']
+          bot.api.send_sticker(chat_id: message.chat.id, sticker: stickers.sample['file_id'])
+        end
       when '/question@the_polina_bot'
         uri = URI(CHGK_QUESTION_URL)
         request = Net::HTTP.get(uri)
