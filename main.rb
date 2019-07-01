@@ -4,7 +4,7 @@ require 'telegram/bot'
 require 'nokogiri'
 require_relative 'faraday'
 NINA_STICKER = 'CAADAgADWwADR6pIA_YeZRDKDLd7Ag'
-FOR_NINA_STICKER = 'CAADAgAD-gADR6pIA6S-20U5eYtHAg'
+FOR_NINA_STICKER = 'CAADAgAD5wADR6pIA-ss3yCOsEYpAg'
 FOR_SASHA_STICKER = 'CAADAgADbgADR6pIA0pkDbdQ0CX_Ag'
 HOROSH_STICKER = 'CAADAgADQAADR6pIA-gUF1CgDVpoAg'
 EBANINA_STICKER_PACK = 'EbaninaFromPolina'
@@ -13,7 +13,6 @@ PROXY = ENV.fetch('proxy')
 CHGK_QUESTION_URL = 'https://db.chgk.info/xml/random/from_2012-01-01/limit1/types1'
 CHGK_IMAGE_URL = 'https://db.chgk.info/images/db/'
 CHGK_COPYRIGHT_URL = 'http://db.chgk.info'
-MARRY_TEXTS = ['Профорк, долго еще Ане в девках ходить?', 'Будь мужиком@сделай предложение', 'Свадьба скоро?', 'Я уже приготовил фломастеры']
 PIC_TEXT = 'pic: '
 
 def nina_sticker(bot)
@@ -45,8 +44,6 @@ def work(bot)
         bot.api.send_message(chat_id: message.chat.id, text: "Теперь водит @#{user['user']['username'] || user['user']['firstname']}")
       when '/horosh@the_polina_bot'
         bot.api.send_sticker(chat_id: message.chat.id, sticker: HOROSH_STICKER)
-      when '/marry@the_polina_bot'
-        bot.api.send_message(chat_id: message.chat.id, text: MARRY_TEXTS.sample)
       when '/reaction@the_polina_bot'
         if message.from.username == 'DaedraAzura'
           bot.api.send_sticker(chat_id: message.chat.id, sticker: FOR_NINA_STICKER)
