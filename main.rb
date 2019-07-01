@@ -37,11 +37,6 @@ def work(bot)
     bot.listen do |message|
       p message
       case message.text
-      when '/randomadmin@the_polina_bot'
-        admins = bot.api.get_chat_administrators(chat_id: message.chat.id)
-        number = admins['result'].count
-        user = admins['result'][Random.rand(number)]
-        bot.api.send_message(chat_id: message.chat.id, text: "Теперь водит @#{user['user']['username'] || user['user']['firstname']}")
       when '/horosh@the_polina_bot'
         bot.api.send_sticker(chat_id: message.chat.id, sticker: HOROSH_STICKER)
       when '/reaction@the_polina_bot'
