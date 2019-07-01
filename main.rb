@@ -48,6 +48,8 @@ def work(bot)
           stickers = bot.api.get_sticker_set(name: EBANINA_STICKER_PACK)['result']['stickers']
           bot.api.send_sticker(chat_id: message.chat.id, sticker: stickers.sample['file_id'])
         end
+      when '/est_cho@the_polina_bot'
+        bot.api.send_message(chat_id: message.chat.id, text: "#чёпосмотреть #чёпочитать")
       when '/question@the_polina_bot'
         uri = URI(CHGK_QUESTION_URL)
         request = Net::HTTP.get(uri)
