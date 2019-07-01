@@ -5,6 +5,7 @@ require 'nokogiri'
 require_relative 'faraday'
 NINA_STICKER = 'CAADAgADWwADR6pIA_YeZRDKDLd7Ag'
 FOR_NINA_STICKER = 'CAADAgAD-gADR6pIA6S-20U5eYtHAg'
+FOR_SASHA_STICKER = 'CAADAgADbgADR6pIA0pkDbdQ0CX_Ag'
 HOROSH_STICKER = 'CAADAgADQAADR6pIA-gUF1CgDVpoAg'
 EBANINA_STICKER_PACK = 'EbaninaFromPolina'
 TOKEN = ENV.fetch('token')
@@ -49,6 +50,8 @@ def work(bot)
       when '/reaction@the_polina_bot'
         if message.from.username == 'DaedraAzura'
           bot.api.send_sticker(chat_id: message.chat.id, sticker: FOR_NINA_STICKER)
+        elsif message.from.username == 'Jymapas'
+          bot.api.send_sticker(chat_id: message.chat.id, sticker: FOR_SASHA_STICKER)
         else
           stickers = bot.api.get_sticker_set(name: EBANINA_STICKER_PACK)['result']['stickers']
           bot.api.send_sticker(chat_id: message.chat.id, sticker: stickers.sample['file_id'])
