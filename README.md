@@ -1,9 +1,6 @@
 # telegram bot
 
 - you need to have ruby
-- gem install bundler
-- gem install nokogiri
-- gem install dotenv
-- gem install telegram-bot-ruby
+- bundle install
 - create .env file with proxy and tokeb
-- run as 'dotenv -f .env ruby main.rb'
+- run as 'bundle exec dotenv -f .env ruby main.rb'

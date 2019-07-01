@@ -1,0 +1,7 @@
+source 'http://rubygems.org'
+gem 'bundler'
+gem 'nokogiri'
+gem 'dotenv'
+gem 'telegram-bot-ruby'
+gem 'socksify'
+gem 'faraday'
