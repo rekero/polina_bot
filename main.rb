@@ -40,14 +40,8 @@ def work(bot)
       when '/horosh@the_polina_bot'
         bot.api.send_sticker(chat_id: message.chat.id, sticker: HOROSH_STICKER)
       when '/reaction@the_polina_bot'
-        if message.from.username == 'DaedraAzura'
-          bot.api.send_sticker(chat_id: message.chat.id, sticker: FOR_NINA_STICKER)
-        elsif message.from.username == 'Jymapas'
-          bot.api.send_sticker(chat_id: message.chat.id, sticker: FOR_SASHA_STICKER)
-        else
-          stickers = bot.api.get_sticker_set(name: EBANINA_STICKER_PACK)['result']['stickers']
-          bot.api.send_sticker(chat_id: message.chat.id, sticker: stickers.sample['file_id'])
-        end
+        stickers = bot.api.get_sticker_set(name: EBANINA_STICKER_PACK)['result']['stickers']
+        bot.api.send_sticker(chat_id: message.chat.id, sticker: stickers.sample['file_id'])
       when '/est_cho@the_polina_bot'
         bot.api.send_message(chat_id: message.chat.id, text: "#чёпосмотреть #чёпочитать")
       when '/question@the_polina_bot'
