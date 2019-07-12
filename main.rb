@@ -64,7 +64,7 @@ def work(bot)
         else
           bot.api.send_message(chat_id: message.chat.id, text: "#{question} #{date}")
           sleep 65
-          bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) #{CHGK_COPYRIGHT_URL}/tour/#{tour}/#{number}")
+          bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}")
         end
       end
     end
