@@ -53,6 +53,9 @@ def work(bot)
         date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
         authors = Nokogiri::XML(request).at_xpath('//Authors').content
         criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
+        criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
+        tour = Nokogiri::XML(request).at_xpath('//tourFileName').content
+        number = Nokogiri::XML(request).at_xpath('//Number').content
         if question.include?(PIC_TEXT)
           question.gsub!(PIC_TEXT, CHGK_IMAGE_URL)
         end
@@ -60,8 +63,8 @@ def work(bot)
           bot.api.send_message(chat_id: message.chat.id, text: "Я спас вас от вопроса Ершова")
         else
           bot.api.send_message(chat_id: message.chat.id, text: "#{question} #{date}")
-          sleep 60
-          bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) (с) #{CHGK_COPYRIGHT_URL}")
+          sleep 65
+          bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) #{CHGK_COPYRIGHT_URL}/tour/#{tour}/#{number}")
         end
       end
     end
