@@ -7,6 +7,7 @@ NINA_STICKER = 'CAADAgADWwADR6pIA_YeZRDKDLd7Ag'
 FOR_NINA_STICKER = 'CAADAgAD5wADR6pIA-ss3yCOsEYpAg'
 FOR_SASHA_STICKER = 'CAADAgADbgADR6pIA0pkDbdQ0CX_Ag'
 HOROSH_STICKER = 'CAADAgADQAADR6pIA-gUF1CgDVpoAg'
+SUN_STICKER = 'CAADAgADtAADIo4KAAEKpIfc9R7N7wI'
 EBANINA_STICKER_PACK = 'EbaninaFromPolina'
 TOKEN = ENV.fetch('token')
 PROXY = ENV.fetch('proxy')
@@ -14,6 +15,24 @@ CHGK_QUESTION_URL = 'https://db.chgk.info/xml/random/from_2012-01-01/limit1/type
 CHGK_IMAGE_URL = 'https://db.chgk.info/images/db/'
 CHGK_COPYRIGHT_URL = 'http://db.chgk.info'
 PIC_TEXT = 'pic: '
+
+def good_boy(bot)
+  @time = Time.now + Random.rand(14600..17600)
+  begin
+    loop do
+      sleep 5000
+      p @time
+      if Time.now > @time
+        bot.api.send_message(chat_id: -1001098597975, text: "Вы хорошие")
+        bot.api.send_sticker(chat_id: -1001098597975, sticker: SUN_STICKER)
+        @time = Time.now + Random.rand(14600..25600)
+      end
+    end
+  rescue => e
+    p e.message
+    retry
+  end
+end
 
 def nina_sticker(bot)
   @time = Time.now + Random.rand(4600..7600)
@@ -80,7 +99,9 @@ begin
     p 'start'
     t1 = Thread.new{nina_sticker(bot)}
     t2 = Thread.new{work(bot)}
+    t3 = Thread.new{good_boy(bot)}
     t1.join
     t2.join
+    t3.join
   end
 end
