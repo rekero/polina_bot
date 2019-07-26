@@ -17,15 +17,15 @@ CHGK_COPYRIGHT_URL = 'http://db.chgk.info'
 PIC_TEXT = 'pic: '
 
 def good_boy(bot)
-  @time = Time.now + Random.rand(14600..17600)
+  @time = Time.now + Random.rand(146000..176000)
   begin
     loop do
-      sleep 5000
+      sleep 50000
       p @time
       if Time.now > @time
         bot.api.send_message(chat_id: -1001098597975, text: "Вы хорошие")
         bot.api.send_sticker(chat_id: -1001098597975, sticker: SUN_STICKER)
-        @time = Time.now + Random.rand(14600..25600)
+        @time = Time.now + Random.rand(146000..256000)
       end
     end
   rescue => e
