@@ -10,10 +10,12 @@ HOROSH_STICKER = 'CAADAgADQAADR6pIA-gUF1CgDVpoAg'
 EBANINA_STICKER_PACK = 'EbaninaFromPolina'
 TOKEN = ENV.fetch('token')
 PROXY = ENV.fetch('proxy')
+VK_TOKEN = ENV.fetch('vk_token')
 CHGK_QUESTION_URL = 'https://db.chgk.info/xml/random/from_2012-01-01/limit1/types1'
 CHGK_IMAGE_URL = 'https://db.chgk.info/images/db/'
 CHGK_COPYRIGHT_URL = 'http://db.chgk.info'
 PIC_TEXT = 'pic: '
+DUDKIN = 110064
 
 def nina_sticker(bot)
   @time = Time.now + Random.rand(4600..7600)
@@ -50,6 +52,10 @@ def work(bot)
         end
       when '/est_cho@the_polina_bot'
         bot.api.send_message(chat_id: message.chat.id, text: "#чёпосмотреть #чёпочитать")
+      when '/dudkin@the_polina_bot'
+        vk = VkontakteApi::Client.new
+        jokes = vk.wall.get(owner_id: DUDKIN, count: 100, filter: 'owner', access_token: VK_TOKEN, v: '5.103')[:items]
+        bot.api.send_message(chat_id: message.chat.id, text: jokes.sample[:text])
       when '/question@the_polina_bot'
         uri = URI(CHGK_QUESTION_URL)
         request = Net::HTTP.get(uri)
