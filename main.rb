@@ -67,7 +67,7 @@ def work(bot)
         bot.api.send_message(chat_id: message.chat.id, text: "#чёпосмотреть #чёпочитать")
       when '/dudkin@the_polina_bot'
         vk = VkontakteApi::Client.new
-        jokes = vk.wall.get(owner_id: DUDKIN, count: 100, filter: 'owner', access_token: VK_TOKEN, v: '5.103')[:items]
+        jokes = vk.wall.get(owner_id: DUDKIN, count: 100, filter: 'owner', access_token: VK_TOKEN, v: '5.103', offset: Random.rand(0..9)*100)[:items]
         bot.api.send_message(chat_id: message.chat.id, text: jokes.sample[:text])
       when '/question@the_polina_bot'
         uri = URI(CHGK_QUESTION_URL)
