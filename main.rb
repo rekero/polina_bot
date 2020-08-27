@@ -1,8 +1,13 @@
+require 'rubygems'
+require 'bundler/setup'
+Bundler.require(:default)
 require 'socksify'
 require 'socksify/http'
 require 'telegram/bot'
 require 'nokogiri'
 require 'vkontakte_api'
+require 'openssl'
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 # require_relative 'faraday'
 NINA_STICKER = 'CAADAgADWwADR6pIA_YeZRDKDLd7Ag'
 FOR_NINA_STICKER = 'CAADAgAD5wADR6pIA-ss3yCOsEYpAg'
@@ -55,10 +60,13 @@ def nina_sticker(bot)
 end
 
 def work(bot)
+  users = {}
   begin
     bot.listen do |message|
       p message
       case message.text
+      when '/stats@the_polina_bot'
+	bot.api.send_message(chat_id: message.chat.id, text: users.map { |k, v| "#{k} : #{v}" }.join(';'))
       when '/horosh@the_polina_bot'
         bot.api.send_sticker(chat_id: message.chat.id, sticker: HOROSH_STICKER)
       when '/reaction@the_polina_bot'
@@ -71,6 +79,12 @@ def work(bot)
         jokes = vk.wall.get(owner_id: DUDKIN, count: 100, filter: 'owner', access_token: VK_TOKEN, v: '5.103', offset: Random.rand(0..9)*100)[:items]
         bot.api.send_message(chat_id: message.chat.id, text: jokes.sample[:text])
       when '/question@the_polina_bot'
+        name = message.from.username || "#{message.from.first_name} #{message.from.last_name}"
+        unless  users[name].nil?
+	  users[name] = users[name]+1
+        else
+          users[name] = 0
+        end
         uri = URI(CHGK_QUESTION_URL)
         request = Net::HTTP.get(uri)
         question = Nokogiri::XML(request).at_xpath('//Question').content
@@ -79,19 +93,14 @@ def work(bot)
         date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
         authors = Nokogiri::XML(request).at_xpath('//Authors').content
         criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
-        criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
         tour = Nokogiri::XML(request).at_xpath('//tourFileName').content
         number = Nokogiri::XML(request).at_xpath('//Number').content
         if question.include?(PIC_TEXT)
           question.gsub!(PIC_TEXT, CHGK_IMAGE_URL)
         end
-        if authors.include?('Ершов')
-          bot.api.send_message(chat_id: message.chat.id, text: "Я спас вас от вопроса Ершова")
-        else
           bot.api.send_message(chat_id: message.chat.id, text: "#{question} #{date}")
           sleep 65
           bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}")
-        end
       end
     end
   rescue => e
