@@ -95,18 +95,20 @@ def work(bot)
         criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
         tour = Nokogiri::XML(request).at_xpath('//tourFileName').content
         number = Nokogiri::XML(request).at_xpath('//Number').content
-        if question.include?(PIC_TEXT)
-          question.gsub!(PIC_TEXT, CHGK_IMAGE_URL)
-        end
-          bot.api.send_message(chat_id: message.chat.id, text: "#{question} #{date}")
-          sleep 65
-          bot.api.send_message(chat_id: message.chat.id, text: "#{answer}(#{criteria})(#{comments}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}")
+        bot.api.send_message(chat_id: message.chat.id, text: "#{clean_text(question)} #{date}")
+        sleep 65
+        bot.api.send_message(chat_id: message.chat.id, text: "#{clean_text(answer)}(#{criteria})(#{clean_text(comments)}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}")
       end
     end
   rescue => e
     p e.message
     retry
   end
+end
+
+def clean_text(text)
+  parsed_text = Nokogiri::HTML.parse text
+  parsed_text.text.gsub(PIC_TEXT, CHGK_IMAGE_URL)
 end
 
 
