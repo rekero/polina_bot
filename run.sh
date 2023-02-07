@@ -1,1 +1,1 @@
-command=bundle exec dotenv -f .env ruby main.rb
+command=bundle exec ruby main.rb

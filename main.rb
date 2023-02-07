@@ -7,10 +7,13 @@ require 'telegram/bot'
 require 'nokogiri'
 require 'vkontakte_api'
 require 'openssl'
+require 'dotenv'
+Dotenv.load
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 # require_relative 'faraday'
 NINA_STICKER = 'CAADAgADWwADR6pIA_YeZRDKDLd7Ag'
 FOR_NINA_STICKER = 'CAADAgAD5wADR6pIA-ss3yCOsEYpAg'
+NEW_NINA_STICKER = 'CAACAgIAAx0CSoiGYwACAg1iXT46RiFZu9ZC4-8-FRuFajh6PgACJhQAAkHFIUpMI1D7UR-ORiQE'
 FOR_SASHA_STICKER = 'CAADAgADbgADR6pIA0pkDbdQ0CX_Ag'
 HOROSH_STICKER = 'CAADAgADQAADR6pIA-gUF1CgDVpoAg'
 SUN_STICKER = 'CAADAgADtAADIo4KAAEKpIfc9R7N7wI'
@@ -49,8 +52,8 @@ def nina_sticker(bot)
       sleep 1200
       p @time
       if Time.now.hour < 18 && Time.now.hour > 5 && Time.now > @time
-        bot.api.send_sticker(chat_id: -1001098597975, sticker: NINA_STICKER)
-        @time = Time.now + Random.rand(4600..7600)
+        bot.api.send_sticker(chat_id: -1001098597975, sticker: NEW_NINA_STICKER)
+        @time = Time.now + Random.rand(14600..17600)
       end
     end
   rescue => e
@@ -79,31 +82,38 @@ def work(bot)
         jokes = vk.wall.get(owner_id: DUDKIN, count: 100, filter: 'owner', access_token: VK_TOKEN, v: '5.103', offset: Random.rand(0..9)*100)[:items]
         bot.api.send_message(chat_id: message.chat.id, text: jokes.sample[:text])
       when '/question@the_polina_bot'
-        name = message.from.username || "#{message.from.first_name} #{message.from.last_name}"
-        unless  users[name].nil?
-	  users[name] = users[name]+1
-        else
-          users[name] = 0
+	if message.chat.username == 'vprsk'
+          name = message.from.username || "#{message.from.first_name} #{message.from.last_name}"
+          unless  users[name].nil?
+            users[name] = users[name]+1
+          else
+            users[name] = 0
+          end
+        question, answer = parse_question
+          bot.api.send_message(chat_id: message.chat.id, text: question)
+          sleep 65
+          bot.api.send_message(chat_id: message.chat.id, text: answer)
         end
-        uri = URI(CHGK_QUESTION_URL)
-        request = Net::HTTP.get(uri)
-        question = Nokogiri::XML(request).at_xpath('//Question').content
-        answer = Nokogiri::XML(request).at_xpath('//Answer').content
-        comments = Nokogiri::XML(request).at_xpath('//Comments').content
-        date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
-        authors = Nokogiri::XML(request).at_xpath('//Authors').content
-        criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
-        tour = Nokogiri::XML(request).at_xpath('//tourFileName').content
-        number = Nokogiri::XML(request).at_xpath('//Number').content
-        bot.api.send_message(chat_id: message.chat.id, text: "#{clean_text(question)} #{date}")
-        sleep 65
-        bot.api.send_message(chat_id: message.chat.id, text: "#{clean_text(answer)}(#{criteria})(#{clean_text(comments)}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}")
       end
     end
   rescue => e
     p e.message
     retry
   end
+end
+
+def parse_question
+  uri = URI(CHGK_QUESTION_URL)
+  request = Net::HTTP.get(uri)
+  question = Nokogiri::XML(request).at_xpath('//Question').content
+  answer = Nokogiri::XML(request).at_xpath('//Answer').content
+  comments = Nokogiri::XML(request).at_xpath('//Comments').content
+  date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
+  authors = Nokogiri::XML(request).at_xpath('//Authors').content
+  criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
+  tour = Nokogiri::XML(request).at_xpath('//tourFileName').content
+  number = Nokogiri::XML(request).at_xpath('//Number').content
+  return "#{clean_text(question)} #{date}", "#{clean_text(answer)}(#{criteria})(#{clean_text(comments)}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}"
 end
 
 def clean_text(text)
