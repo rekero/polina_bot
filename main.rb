@@ -23,7 +23,7 @@ PROXY = ENV.fetch('proxy')
 VK_TOKEN = ENV.fetch('vk_token')
 CHGK_QUESTION_URL = 'https://db.chgk.info/xml/random/from_2012-01-01/limit1/types1'
 CHGK_IMAGE_URL = 'https://db.chgk.info/images/db/'
-CHGK_COPYRIGHT_URL = 'http://db.chgk.info'
+CHGK_COPYRIGHT_URL = 'http://db.chgk.net'
 PIC_TEXT = 'pic: '
 DUDKIN = 110064
 
@@ -89,10 +89,14 @@ def work(bot)
           else
             users[name] = 0
           end
-        question, answer = parse_question
-          bot.api.send_message(chat_id: message.chat.id, text: question)
-          sleep 65
-          bot.api.send_message(chat_id: message.chat.id, text: answer)
+          question, answer, authors = parse_question
+          if authors.include?('Ершов')
+	    bot.api.send_message(chat_id: message.chat.id, text: "Я спас вас от вопроса Ершова")
+          else
+            bot.api.send_message(chat_id: message.chat.id, text: question)
+            sleep 65
+            bot.api.send_message(chat_id: message.chat.id, text: answer)
+          end
         end
       end
     end
@@ -113,7 +117,7 @@ def parse_question
   criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
   tour = Nokogiri::XML(request).at_xpath('//tourFileName').content
   number = Nokogiri::XML(request).at_xpath('//Number').content
-  return "#{clean_text(question)} #{date}", "#{clean_text(answer)}(#{criteria})(#{clean_text(comments)}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}"
+  return "#{clean_text(question)} #{date}", "#{clean_text(answer)}(#{criteria})(#{clean_text(comments)}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}", authors
 end
 
 def clean_text(text)
