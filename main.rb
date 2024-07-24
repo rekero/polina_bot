@@ -8,6 +8,7 @@ require 'nokogiri'
 require 'vkontakte_api'
 require 'openssl'
 require 'dotenv'
+require 'date'
 Dotenv.load
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 # require_relative 'faraday'
@@ -21,7 +22,7 @@ EBANINA_STICKER_PACK = 'EbaninaFromPolina'
 TOKEN = ENV.fetch('token')
 PROXY = ENV.fetch('proxy')
 VK_TOKEN = ENV.fetch('vk_token')
-CHGK_QUESTION_URL = 'https://db.chgk.info/xml/random/from_2012-01-01/limit1/types1'
+CHGK_QUESTION_URL = "https://db.chgk.info/xml/random/from_#{Date.today.year - 10}-01-01/limit1/types1"
 CHGK_IMAGE_URL = 'https://db.chgk.info/images/db/'
 CHGK_COPYRIGHT_URL = 'http://db.chgk.net'
 PIC_TEXT = 'pic: '
@@ -115,14 +116,14 @@ def parse_question
   date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
   authors = Nokogiri::XML(request).at_xpath('//Authors').content
   criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
-  tour = Nokogiri::XML(request).at_xpath('//tourFileName').content
+  tour = Nokogiri::XML(request).at_xpath('//ParentTextId').content
   number = Nokogiri::XML(request).at_xpath('//Number').content
   return "#{clean_text(question)} #{date}", "#{clean_text(answer)}(#{criteria})(#{clean_text(comments)}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}", authors
 end
 
 def clean_text(text)
   parsed_text = Nokogiri::HTML.parse text
-  parsed_text.text.gsub(PIC_TEXT, CHGK_IMAGE_URL)
+  parsed_text.text.gsub(PIC_TEXT, CHGK_IMAGE_URL) unless text.include?('imgur')
 end
 
 
