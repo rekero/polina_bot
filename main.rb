@@ -132,19 +132,17 @@ def parse_zapas_question
   uri = URI("#{ZAPAS_QUESTION_URL}#{rand(1..410000)}")
   p uri.to_s
   request = Net::HTTP.get(uri)
-  result = if Nokogiri::HTML.parse(request).css("script")[37].content.include?('nezachet')
-    Nokogiri::HTML.parse(request).css("script")[37].content.delete('\\')
-  elsif Nokogiri::HTML.parse(request).css("script")[38].content.include?('nezachet')
-    Nokogiri::HTML.parse(request).css("script")[38].content.delete('\\')
-  end
+  result = Nokogiri::HTML.parse(request).css("script").detect do |element|
+    element.content.include?('nezachet')
+  end&.content&.delete('\\')
   return uri.to_s, "" if result.nil?
 
-  question = result.slice(result.index('text"')..result.index('","razdatkaText'))[7..-3]
+  question = result.slice(result.index('text"')..result.index('","razdatkaText')+1)[7..-3]
   answer = result.slice(result.index('answer"')..result.index('","answerPic'))[9..-3]
   zachet = result.slice(result.index('zachet"')..result.index('nezachet'))[10..-4]
   comment = result.slice(result.index('comment"')..result.index('note'))[10..-4]
   razdatka = result.slice(result.index('razdatkaPic"')..result.index('audio'))[15..-4]
-  return "#{question} #{razdatka}", "#{answer} (#{zachet})(#{comment}) #{ZAPAS_URL}"
+  return "#{question} #{razdatka == '' ? '' : ZAPAS_URL + razdatka}", "#{answer} (#{zachet})(#{comment}) #{ZAPAS_URL}"
 end
 
 def clean_text(text)
