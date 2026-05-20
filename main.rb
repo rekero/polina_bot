@@ -9,6 +9,7 @@ require 'vkontakte_api'
 require 'openssl'
 require 'dotenv'
 require 'date'
+require 'open-uri'
 Dotenv.load
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 # require_relative 'faraday'
@@ -28,7 +29,7 @@ CHGK_COPYRIGHT_URL = 'http://db.chgk.net'
 PIC_TEXT = 'pic: '
 DUDKIN = 110064
 ZAPAS_URL = 'https://gotquestions.online/'
-ZAPAS_QUESTION_URL = 'https://gotquestions.online/question/'
+ZAPAS_QUESTION_URL = 'https://gotquestions.online/api/question/'
 
 def good_boy(bot)
   @time = Time.now + Random.rand(146000..176000)
@@ -115,34 +116,48 @@ def work(bot)
 end
 
 def parse_question
-  uri = URI(CHGK_QUESTION_URL)
-  request = Net::HTTP.get(uri)
-  question = Nokogiri::XML(request).at_xpath('//Question').content
-  answer = Nokogiri::XML(request).at_xpath('//Answer').content
-  comments = Nokogiri::XML(request).at_xpath('//Comments').content
-  date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
-  authors = Nokogiri::XML(request).at_xpath('//Authors').content
-  criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
-  tour = Nokogiri::XML(request).at_xpath('//ParentTextId').content
-  number = Nokogiri::XML(request).at_xpath('//Number').content
+  retries = 0
+  begin
+    uri = URI(CHGK_QUESTION_URL)
+    request = Net::HTTP.get(uri)
+    question = Nokogiri::XML(request).at_xpath('//Question').content
+    answer = Nokogiri::XML(request).at_xpath('//Answer').content
+    comments = Nokogiri::XML(request).at_xpath('//Comments').content
+    date = Nokogiri::XML(request).at_xpath('//tourPlayedAt').content
+    authors = Nokogiri::XML(request).at_xpath('//Authors').content
+    criteria = Nokogiri::XML(request).at_xpath('//PassCriteria').content
+    tour = Nokogiri::XML(request).at_xpath('//ParentTextId').content
+    number = Nokogiri::XML(request).at_xpath('//Number').content
+    tournament = Nokogiri::XML(request).at_xpath('//tournamentTitle').content
+    raise if tournament.include?('Окский')
+  rescue => e
+    p e.message
+    retries += 1
+    retry if retries < 3
+  end
   return "#{clean_text(question)} #{date}", "#{clean_text(answer)}(#{criteria})(#{clean_text(comments)}) #{CHGK_COPYRIGHT_URL}/question/#{tour}/#{number}", authors
 end
 
 def parse_zapas_question
-  uri = URI("#{ZAPAS_QUESTION_URL}#{rand(1..410000)}")
-  p uri.to_s
-  request = Net::HTTP.get(uri)
-  result = Nokogiri::HTML.parse(request).css("script").detect do |element|
-    element.content.include?('nezachet')
-  end&.content&.delete('\\')
-  return uri.to_s, "" if result.nil?
-
-  question = result.slice(result.index('text"')..result.index('","razdatkaText')+1)[7..-3]
-  answer = result.slice(result.index('answer"')..result.index('","answerPic'))[9..-3]
-  zachet = result.slice(result.index('zachet"')..result.index('nezachet'))[10..-4]
-  comment = result.slice(result.index('comment"')..result.index('note'))[10..-4]
-  razdatka = result.slice(result.index('razdatkaPic"')..result.index('audio'))[15..-4]
-  return "#{question} #{razdatka == '' ? '' : ZAPAS_URL + razdatka}", "#{answer} (#{zachet})(#{comment}) #{ZAPAS_URL}"
+  retries = 0
+  begin
+    number = rand(1..410000)
+    internal_uri = "#{ZAPAS_QUESTION_URL}#{number}"
+    external_uri = "#{ZAPAS_URL}question/#{number}"
+    request = URI.open(internal_uri, 'r:UTF-8', &:read)
+    result = JSON.parse(request)
+    raise if Date.parse(result["endDate"]).year < Date.today.year - 10
+  rescue => e
+    p e.message
+    retries += 1
+    retry if retries < 5
+  end
+  question = result["text"].tr("\n", " ").tr('\"', "") + result["razdatkaText"].tr("\n", " ").tr('\"', "")
+  answer = result["answer"]
+  zachet = result["zachet"]
+  comment = result["comment"]
+  razdatka = result["razdatkaPic"]
+  return "#{question} #{razdatka == '' ? '' : ZAPAS_URL + razdatka}", "#{answer} (#{zachet})(#{comment}) #{external_uri.to_s}"
 end
 
 def clean_text(text)
